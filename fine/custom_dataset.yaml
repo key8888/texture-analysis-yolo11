@@ -1,0 +1,5 @@
+train: C:\Users\aottw\Documents\workspace\texture-analysis-yolo11\fine\train
+val: 
+nc: 5
+
+names: ["a-axis","twin","y2o3_appleGreen","y2o3_green","y2o3_peppermintGreen"]
