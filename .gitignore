@@ -8,6 +8,11 @@ __pycache__/
 # C extensions
 *.so
 
+# YOLO
+runs/
+fine/
+yolo11x-seg.pt
+
 # Distribution / packaging
 .Python
 build/
