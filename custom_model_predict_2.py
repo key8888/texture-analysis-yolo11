@@ -2,6 +2,7 @@ import os
 import cv2
 from ultralytics import YOLO
 
+
 def load_model(model_path):
     """
     モデルを読み込み、エラー発生時は例外を送出する。
@@ -13,6 +14,7 @@ def load_model(model_path):
     except Exception as e:
         print(f"モデルの読み込み中にエラーが発生しました: {e}")
         raise
+
 
 def get_target_class_indices(model, target_classes):
     """
@@ -32,7 +34,8 @@ def get_target_class_indices(model, target_classes):
             raise ValueError(f"対象クラス '{target}' がモデルに存在しません。")
     return indices
 
-def perform_inference(model, image_path, target_class_indices, conf=0.65, iou=0.5, imgsz=512, device="cpu"):
+
+def perform_inference(model, image_path, target_class_indices, conf=0.7, iou=0.5, imgsz=512, device="cpu"):
     """
     画像ファイルの存在確認後、対象クラスのみ検出するように推論を実行する。
     自動保存は無効にし、後処理で描画するため show_labels は False に設定。
@@ -64,15 +67,17 @@ def perform_inference(model, image_path, target_class_indices, conf=0.65, iou=0.
         print(f"推論中にエラーが発生しました: {e}")
         raise
 
-def process_results(results, names, image_path):
+
+def process_results(results, image_path, custom_mapping):
     """
     推論結果から検出ボックス情報を取得し、元画像に描画する。
     ・各ボックスは緑色で描画し、
-    ・表示されるラベルは、各検出結果のクラス名（ただし "y2o3_peppermintGreen" は "y_pg" に置換済み）を使用する。
+    ・出力されるラベルは、結果オブジェクト内の names 属性を custom_mapping に従って置換したものを使用する。
     ラベルは小さいフォントで、背景は黒色の半透明で描画する。
     """
     try:
         res = results[0]
+        print(f"推論結果:{res}")
     except IndexError:
         print("推論結果が見つかりません。")
         return
@@ -83,17 +88,26 @@ def process_results(results, names, image_path):
         print("画像の読み込みに失敗しました。")
         return
 
+    # 結果オブジェクトの names 属性を、custom_mapping に従って更新する
+    if hasattr(res, 'names'):
+        for idx, label in res.names.items():
+            if label in custom_mapping:
+                old = res.names[idx]
+                res.names[idx] = custom_mapping[label]
+                print(f"結果オブジェクト内のラベル '{old}' を '{res.names[idx]}' に置換しました。")
+
     # YOLOの結果から検出されたボックス情報を取得
     try:
         # ボックス情報は [x1, y1, x2, y2, conf, cls] の形式の numpy 配列
-        boxes = res.boxes.data.cpu().numpy() if hasattr(res.boxes.data, "cpu") else res.boxes.data
+        boxes = res.boxes.data.cpu().numpy() if hasattr(
+            res.boxes.data, "cpu") else res.boxes.data
     except Exception as e:
         print(f"検出結果の取得に失敗しました: {e}")
         return
 
     # 描画パラメータ
     box_color = (0, 255, 0)       # 緑色
-    box_thickness = 2
+    box_thickness = 1
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.5              # 小さいフォントサイズ
     text_thickness = 1
@@ -107,17 +121,19 @@ def process_results(results, names, image_path):
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         # バウンディングボックスの描画
         cv2.rectangle(image, (x1, y1), (x2, y2), box_color, box_thickness)
-        
-        # 検出されたクラスIDから、対応するラベルを取得
-        label_text = names[int(cls)]
-        
+
+        # 結果オブジェクトの names 属性から、対応するラベルを取得
+        label_text = res.names[int(cls)]
+
         # テキストサイズの取得
-        (text_width, text_height), baseline = cv2.getTextSize(label_text, font, font_scale, text_thickness)
-        
+        (text_width, text_height), baseline = cv2.getTextSize(
+            label_text, font, font_scale, text_thickness)
+
         # テキスト背景の左上座標（バウンディングボックス上部、画像外に出ないよう調整）
         text_x = x1
-        text_y = y1 - 10 if y1 - 10 > text_height + baseline else y1 + text_height + baseline
-        
+        text_y = y1 - 10 if y1 - 10 > text_height + \
+            baseline else y1 + text_height + baseline
+
         # テキスト背景用の矩形座標
         rect_x1 = text_x
         rect_y1 = text_y - text_height - baseline
@@ -126,40 +142,50 @@ def process_results(results, names, image_path):
 
         # 半透明の背景描画のため、対象領域のオーバーレイを作成しブレンディング
         overlay = image.copy()
-        cv2.rectangle(overlay, (rect_x1, rect_y1), (rect_x2, rect_y2), bg_color, -1)
+        cv2.rectangle(overlay, (rect_x1, rect_y1),
+                      (rect_x2, rect_y2), bg_color, -1)
         image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
 
         # テキストの描画
-        cv2.putText(image, label_text, (text_x, text_y), font, font_scale, text_color, text_thickness, cv2.LINE_AA)
+        cv2.putText(image, label_text, (text_x, text_y), font,
+                    font_scale, text_color, text_thickness, cv2.LINE_AA)
 
-    output_path = "output_custom.jpg"
+    output_path = "predict/output_custom_yo.png"
     cv2.imwrite(output_path, image)
     print(f"注釈付き画像を {output_path} に保存しました。")
+    print(f"boxes: {boxes.shape}")
+
 
 def main():
     model_path = "runs/segment/train2/weights/best.pt"
     image_path = "fine/val/images/a3e1c24d-A231101_1_53Pa_350C_YBCO-STO_2_2_PlanView_13.bmp"
     # 同時に検出する対象クラス群
-    target_classes = ["y2o3_green", "y2o3_orange", "y2o3_peppermintGreen"]
-    # y2o3_peppermintGreen の場合、出力画像上で "y_pg" と表示するためのカスタムマッピング
-    custom_mapping = {"y2o3_green":"yg", "y2o3_orange":"yo","y2o3_peppermintGreen": "ypg"}
+    target_classes = [
+        # "y2o3_appleGreen",
+        # "y2o3_green",
+        "y2o3_orange",
+        # "y2o3_peppermintGreen"
+    ]
+    # 出力画像上で表示するためのカスタムマッピング
+    custom_mapping = {
+        # "y2o3_appleGreen": "yag",
+        # "y2o3_green": "yg",
+        "y2o3_orange": "yo",
+        # "y2o3_peppermintGreen": "ypg"
+    }
 
     try:
         model = load_model(model_path)
         # 対象クラス群のインデックスを取得
         target_indices = get_target_class_indices(model, target_classes)
-        
-        # カスタムマッピングに沿って、モデル内のクラス名を更新する
-        for target in target_classes:
-            for idx, name in model.names.items():
-                if name == target and target in custom_mapping:
-                    model.names[idx] = custom_mapping[target]
-                    print(f"モデルのラベル '{target}' を '{custom_mapping[target]}' に置換しました。")
-        
+
+        # 推論実行
         results = perform_inference(model, image_path, target_indices)
-        process_results(results, model.names, image_path)
+        # 結果オブジェクト内の names を custom_mapping に従って更新し、描画する
+        process_results(results, image_path, custom_mapping)
     except Exception as e:
         print(f"エラーが発生しました: {e}")
+
 
 if __name__ == "__main__":
     main()
