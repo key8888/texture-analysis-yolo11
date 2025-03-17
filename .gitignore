@@ -12,6 +12,7 @@ __pycache__/
 runs/
 fine/
 yolo11x-seg.pt
+yolo11n.pt
 
 # Distribution / packaging
 .Python
