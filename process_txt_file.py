@@ -11,8 +11,11 @@ def process_file(file_path, output_folder):
         if parts:
             try:
                 first_int = int(parts[0])
-                if first_int in {3, 4, 5}:  # 3, 4, 5 の場合
-                    parts[0] = '5'  # すべて5に統一
+                if first_int in {2, 3, 5}:  # 2, 3, 5 の場合
+                    parts[0] = '2'  # すべて3に統一
+                elif first_int in {4}:
+                    parts[0] = '3'
+                    print("4が出現！",file_path)
                 processed_lines.append(' '.join(parts))
             except ValueError:
                 continue  # 整数でない場合はスキップ
@@ -33,5 +36,5 @@ def process_all_files(input_folder):
     print(f"処理完了: {len(txt_files)} 個のファイルを処理しました。")
 
 if __name__ == "__main__":
-    input_folder = "./hello"
+    input_folder = "YOLO_dataset_zip/project-6-at-2025-03-17-14-27-c0821f72/labels"
     process_all_files(input_folder)

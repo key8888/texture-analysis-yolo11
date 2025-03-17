@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "id": 0,
+      "name": "a-axis"
+    },
+    {
+      "id": 1,
+      "name": "twin"
+    },
+    {
+      "id": 2,
+      "name": "y2o3"
+    },
+    {
+      "id": 3,
+      "name": "y2o3_orange"
+    }
+  ],
+  "info": {
+    "year": 2025,
+    "version": "1.0",
+    "contributor": "Label Studio"
+  }
+}

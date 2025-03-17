@@ -19,7 +19,9 @@ if __name__ == '__main__':
         imgsz=512,                  # 入力画像サイズ
         batch=16,                   # バッチサイズ（必要に応じて変更）
         lr0=0.005,                    # 初期学習率（例）
-        device="cuda"
+        device="cuda",
+        project="./runs/segment",
+        name="5d5"
     )
 
     # 3. トレーニング結果の表示
