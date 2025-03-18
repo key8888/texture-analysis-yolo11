@@ -15,13 +15,13 @@ if __name__ == '__main__':
     # ※ data.yaml のパスやエポック数、画像サイズなどはタスクに合わせて変更してください
     results = model.train(
         data="./fine/custom_dataset.yaml",  # data.yaml のファイルパス
-        epochs=300,                 # エポック数
+        epochs=600,                 # エポック数
         imgsz=512,                  # 入力画像サイズ
         batch=16,                   # バッチサイズ（必要に応じて変更）
         lr0=0.005,                    # 初期学習率（例）
         device="cuda",
-        project="./runs/segment",
-        name="5d5"
+        project="./runs/segment",   # 保存場所
+        name="5d5_epochs_600"       # 保存フォルダ名
     )
 
     # 3. トレーニング結果の表示
