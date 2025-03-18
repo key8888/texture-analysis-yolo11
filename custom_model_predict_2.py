@@ -35,7 +35,7 @@ def get_target_class_indices(model, target_classes):
     return indices
 
 
-def perform_inference(model, image_path, target_class_indices, conf=0.6, iou=0.5, imgsz=512, device="cpu"):
+def perform_inference(model, image_path, target_class_indices, conf=0.4, iou=0.5, imgsz=512, device="cpu"):
     """
     画像ファイルの存在確認後、対象クラスのみ検出するように推論を実行する。
     自動保存は無効にし、後処理で描画するため show_labels は False に設定。
@@ -106,7 +106,7 @@ def process_results(results, image_path, custom_mapping):
         return
 
     # 描画パラメータ
-    box_color = (0, 255, 0)       # 緑色
+    box_color = (255, 0, 0)       # 緑色
     box_thickness = 1
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.5              # 小さいフォントサイズ
@@ -150,14 +150,14 @@ def process_results(results, image_path, custom_mapping):
         cv2.putText(image, label_text, (text_x, text_y), font,
                     font_scale, text_color, text_thickness, cv2.LINE_AA)
 
-    output_path = "predict/output_custom_y.png"
+    output_path = "predict/output_custom_y_600.png"
     cv2.imwrite(output_path, image)
     print(f"注釈付き画像を {output_path} に保存しました。")
     print(f"boxes: {boxes.shape}")
 
 
 def main():
-    model_path = "runs/segment/5d5/weights/best.pt"
+    model_path = "runs/segment/5d5_epochs_600/weights/best.pt"
     image_path = "fine/val/images/5d59b254-A231027_3_53Pa_250C_YBCO-STO_PlanView_85.bmp"
     # 同時に検出する対象クラス群
     target_classes = [
