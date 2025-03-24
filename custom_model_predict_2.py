@@ -46,6 +46,9 @@ def perform_inference(model, image_path, target_class_indices, conf=0.4, iou=0.5
         results = model.predict(
             source=image_path,             # 画像またはディレクトリ
             conf=conf,                     # 信頼度の閾値
+            # NMS IoU = 0.5 → 0.5以上重なってたら削除（けっこう厳しめ）
+            # NMS IoU = 0.7 → 0.7以上重なってたら削除（ゆるめ）
+            # NMS IoU = 0.3 → ちょっとでも重なったら削除（超厳しい）
             iou=iou,                       # NMS IoUの閾値
             device=device,                 # 推論デバイス（CPUまたはGPU）
             imgsz=imgsz,                   # 推論時リサイズ

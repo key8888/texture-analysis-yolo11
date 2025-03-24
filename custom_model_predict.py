@@ -1,5 +1,6 @@
 import os
 from ultralytics import YOLO
+from pathlib import Path
 
 def load_model(model_path):
     """
@@ -23,7 +24,7 @@ def get_target_class_index(model, target_class):
             return idx
     raise ValueError(f"対象クラス '{target_class}' がモデルに存在しません。")
 
-def perform_inference(model, image_path, target_class_index, conf=0.65, iou=0.5, imgsz=512, device="cpu"):
+def perform_inference(model, image_path, target_class_index, conf=0.7, iou=0.2, imgsz=512, device="cpu"):
     """
     画像ファイルの存在確認後、対象クラスのみ検出するように推論を実行する。
     """
@@ -70,17 +71,19 @@ def process_results(results):
         print("バウンディングボックス情報が見つかりませんでした。")
 
 def main():
-    model_path = "runs/segment/train2/weights/best.pt"
-    image_path = "fine/val/images/a3e1c24d-A231101_1_53Pa_350C_YBCO-STO_2_2_PlanView_13.bmp"
-    target_class = "y2o3_peppermintGreen"
-
-    try:
-        model = load_model(model_path)
-        target_index = get_target_class_index(model, target_class)
-        results = perform_inference(model, image_path, target_index)
-        process_results(results)
-    except Exception as e:
-        print(f"エラーが発生しました: {e}")
+    model_path = Path('runs\\independ')
+    image_path = Path("YOLO_dataset_zip\\project-6-at-2025-03-23-20-14-00444e1f\\images")
+    target_class = "y2o3"
+          
+    for img, mod in zip(image_path.iterdir(), model_path.iterdir()): # i want to iterate both the images and the model
+        print(f'Image: {img}, Model: {mod}')
+        try:
+            model = load_model(mod / 'weights' / 'best.pt')
+            target_index = get_target_class_index(model, target_class)
+            results = perform_inference(model, img, target_index)
+            # process_results(results)
+        except Exception as e:
+            print(f"エラーが発生しました: {e}")
 
 if __name__ == "__main__":
     main()

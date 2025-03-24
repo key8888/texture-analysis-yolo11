@@ -3,9 +3,12 @@
 from ultralytics import YOLO
 from multiprocessing import freeze_support
 from pathlib import Path
+import time
 
 fine = Path("fine")
 runs = Path("runs")
+
+start = time.time()
 
 for spcdr in fine.iterdir():
     # print(spcdr) # fine\no_spcdr_1
@@ -35,3 +38,6 @@ for spcdr in fine.iterdir():
         # # 3. トレーニング結果の表示
         # print("Training finished. Results:")
         # print(results)
+
+end = time.time()
+print(f"処理時間: {end - start:.2f}秒")

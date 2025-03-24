@@ -60,7 +60,7 @@ for name in file_names:
         'train' : str(train),
         'val' : str(val),
         'nc' : 1,
-        'names' : ['y3o3']
+        'names' : ['y2o3']
     }
     with open(new_dir_path / f"no_{name}" / "custom_dataset.yaml", 'w', encoding='utf-8') as f:
         yaml.dump(data, f, allow_unicode=True)

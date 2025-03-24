@@ -1,2 +1,4 @@
 username:label-studio@label.com
 password:ilovelabelstudio
+
+https://mailkyutechjp-my.sharepoint.com/:x:/g/personal/zhang_zicheng453_mail_kyutech_jp/EeIm2tSsjCBJlMevd3sQAEwB1tylj26WQUGSi41foQhO2g?e=10Jfjt
