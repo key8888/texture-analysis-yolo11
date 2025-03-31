@@ -8,7 +8,7 @@ def main():
 
     model = YOLO(model_path)
 
-    metrics = model.test(
+    metrics = model.val(
         data=custom_dataset, # custom_dataset.yaml のファイルパス
         conf=0.3,            # 信頼度のしきい値
         iou=0.3,             # IoUのしきい値（評価用）
