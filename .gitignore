@@ -11,6 +11,7 @@ __pycache__/
 # YOLO
 runs/
 fine/
+data_for_training/
 yolo11x-seg.pt
 yolo11n.pt
 

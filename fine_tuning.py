@@ -8,7 +8,6 @@ import time
 fine = Path("fine")
 runs = Path("runs")
 
-start = time.time()
 
 for spcdr in fine.iterdir():
     # print(spcdr) # fine\no_spcdr_1
@@ -29,7 +28,7 @@ for spcdr in fine.iterdir():
             batch=16,                   # バッチサイズ（必要に応じて変更）
             lr0=0.005,                    # 初期学習率（例）
             device="cuda",
-            project=runs/"independ",   # 保存場所
+            project=runs/"BoundingBox",   # 保存場所
             name=spcdr.stem       # 保存フォルダ名
         )
         
@@ -38,6 +37,3 @@ for spcdr in fine.iterdir():
         # # 3. トレーニング結果の表示
         # print("Training finished. Results:")
         # print(results)
-
-end = time.time()
-print(f"処理時間: {end - start:.2f}秒")
