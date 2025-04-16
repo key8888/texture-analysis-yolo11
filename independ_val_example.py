@@ -1,4 +1,4 @@
-# 独立した検証用画像構成を作る
+# 交差検証のため、独立した検証用画像構成を作る
 
 
 from pathlib import Path
@@ -51,7 +51,7 @@ def make_independent_val_img_structure(output_dir_path: Path, imgs: Path, txts: 
                 
         # create YAML file for ever train and val folder
         train = folder_train_img.parent.resolve()
-        val = folder_train_img.parent.resolve()
+        val = folder_val_img.parent.resolve()
         
         data = {
             'train' : str(train),
@@ -68,6 +68,6 @@ imgs = dataset_source / 'images'
 txts = dataset_source / 'labels'
 classes_txt = dataset_source / 'classes.txt'
 notes_json = dataset_source / 'notes.json'
-output_dir_path = Path('fine')
+output_dir_path = Path('data_for_training')
 
 make_independent_val_img_structure(output_dir_path, imgs, txts, classes_txt, notes_json)
