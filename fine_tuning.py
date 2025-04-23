@@ -5,7 +5,7 @@ import time
 import sys
 
 def precheck_paths(fine_path: Path, runs_path: Path):
-    # "fine" ディレクトリの存在チェック
+    # ディレクトリの存在チェック
     if not fine_path.exists() or not fine_path.is_dir():
         print(f"エラー: 指定されたディレクトリ {fine_path} は存在しません。")
         sys.exit(1)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # パスチェック
     precheck_paths(fine, runs)
     
-    # 高精度な時間計測開始
+    # 時間計測開始
     start = time.perf_counter()
     
     # "data_for_training" 内の各サブディレクトリに対して学習を実行
@@ -50,7 +50,7 @@ if __name__ == '__main__':
             
             print(f"{spcdr.stem} トレーニング終了")
     
-    # 高精度な時間計測終了
+    # 時間計測終了
     end = time.perf_counter()
     elapsed_time = end - start
-    print(f"全処理時間: {elapsed_time:.2f}秒")
+    print(f"全処理時間: {elapsed_time / 60:.2f}分")
