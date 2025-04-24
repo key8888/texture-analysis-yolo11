@@ -12,7 +12,6 @@ __pycache__/
 runs/
 fine/
 data_for_training/
-predict/
 YOLO_dataset_zip/
 yolo11x-seg.pt
 yolo11n.pt
