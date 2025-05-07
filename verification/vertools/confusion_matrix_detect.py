@@ -78,30 +78,63 @@ def read_xyxy_from_json(json_path: Path) -> list[tuple[float, float, float, floa
         
     return boxes
 
-def compute_true_positive(pred_boxes:list, gt_boxes:list, iou_threshold=0.5) -> int:
+def compute_detection_metrics(pred_boxes: list[tuple[float, float, float, float]],
+                              gt_boxes: list[tuple[float, float, float, float]],
+                              iou_threshold: float = 0.5) -> dict[str, float]:
     """
-    :param pred_boxes: 予測ボックスのリスト
-    :param gt_boxes: グラウンドトゥルースボックスのリスト
-    :param iou_threshold: IoUの閾値
-    :return: True Positiveの数
-    """
-    tp = 0
-    for pred_box in pred_boxes:
-        for gt_box in gt_boxes:
-            if compute_iou(pred_box, gt_box) >= iou_threshold:
-                tp += 1
-                break  # 一つでも一致すればカウント
-    
-    return tp
+    オブジェクト検出の評価指標を一括計算する
 
-# # 例
+    :param pred_boxes: 予測ボックスのリスト [(x1, y1, x2, y2), ...]
+    :param gt_boxes: グラウンドトゥルースボックスのリスト [(x1, y1, x2, y2), ...]
+    :param iou_threshold: IoU の閾値
+    :return: {
+        'tp': True Positive の数,
+        'fp': False Positive の数,
+        'fn': False Negative の数,
+        'precision': 適合率,
+        'recall': 再現率,
+        'f1': F1 スコア
+    }
+    """
+    matched_gt = set()
+    tp = 0
+
+    # 予測ボックスごとに、未マッチの GT と照合
+    for pred in pred_boxes:
+        best_iou = 0
+        best_j = -1
+        for j, gt in enumerate(gt_boxes):
+            if j in matched_gt:
+                continue
+            iou = compute_iou(pred, gt)
+            if iou > best_iou:
+                best_iou = iou
+                best_j = j
+
+        if best_iou >= iou_threshold:
+            tp += 1
+            matched_gt.add(best_j)
+
+    fp = len(pred_boxes) - tp
+    fn = len(gt_boxes) - tp
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1        = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+
+    return {
+        'tp': tp,
+        'fp': fp,
+        'fn': fn,
+        'precision': precision,
+        'recall': recall,
+        'f1': f1
+    }
+
+
 pred_boxes = read_xyxy_from_json(Path("predict/result_no_spcdr_1.json"))
-# for i, box in enumerate(box_a):
-#     print(f"box {i}: {box}")
 
 gt_boxes = read_polygon_from_txt(Path("YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_1.txt"))
 gt_boxes = polygon_to_xyxy(gt_boxes)
-# for i, box in enumerate(polygon_to_xyxy(box_b)):
-#     print(f"box {i}: {box}")
 
-print(compute_true_positive(pred_boxes, gt_boxes, iou_threshold=0.5))
+print(compute_detection_metrics(pred_boxes, gt_boxes, iou_threshold=0.5))
