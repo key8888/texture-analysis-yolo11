@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 
-def read_label_txt(file_path) -> list[list[float]]:
+def read_polygon_from_txt(file_path) -> list[list[float]]:
     """
     YOLO形式のラベルファイルを読み込む
     :param file_path: ラベルファイルのパス
@@ -12,16 +12,29 @@ def read_label_txt(file_path) -> list[list[float]]:
         # 前後の空白を削除し[2:-1]、floatに変換する
         return [list(map(float, line[2:-1].split(" "))) for line in lines]
     
-def polygon_to_bbox(polygon, image_width=512, image_height=512) -> tuple[float, float, float, float]:
+def polygon_to_xyxy(polygons:list, image_width=512, image_height=512) -> list[tuple[float, float, float, float]]:
     """
     xyxy形式で出力される
     """
-    xs = polygon[::2]
-    ys = polygon[1::2]
-    x_coords = [x * image_width for x in xs]
-    y_coords = [y * image_height for y in ys]
+    result = []
     
-    return min(x_coords), min(y_coords), max(x_coords), max(y_coords)
+    for polygon in polygons:
+        # 2次元の座標を取得
+        xs = polygon[::2]
+        ys = polygon[1::2]
+        
+        # 座標を512x512の画像サイズに変換
+        x_coords = [x * image_width for x in xs]
+        y_coords = [y * image_height for y in ys]
+        
+        # 最小値と最大値を取得
+        min_x = min(x_coords)
+        min_y = min(y_coords)
+        max_x = max(x_coords)
+        max_y = max(y_coords)
+        
+        result.append((min_x, min_y, max_x, max_y))
+    return result
 
 def compute_iou(box1, box2) -> float:
     """
@@ -65,7 +78,7 @@ def read_xyxy_from_json(json_path: Path) -> list[tuple[float, float, float, floa
         
     return boxes
 
-def compute_true_positive(pred_boxes, gt_boxes, iou_threshold=0.5) -> int:
+def compute_true_positive(pred_boxes:list, gt_boxes:list, iou_threshold=0.5) -> int:
     """
     :param pred_boxes: 予測ボックスのリスト
     :param gt_boxes: グラウンドトゥルースボックスのリスト
@@ -81,12 +94,14 @@ def compute_true_positive(pred_boxes, gt_boxes, iou_threshold=0.5) -> int:
     
     return tp
 
-# 例
-box_a = read_xyxy_from_json(Path("predict/result2.json"))[0]
-box_b = (143.99, 366.26, 171.68, 393.06)
-print("IoU:", compute_iou(box_a, box_b))
+# # 例
+pred_boxes = read_xyxy_from_json(Path("predict/result_no_spcdr_1.json"))
+# for i, box in enumerate(box_a):
+#     print(f"box {i}: {box}")
 
+gt_boxes = read_polygon_from_txt(Path("YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_1.txt"))
+gt_boxes = polygon_to_xyxy(gt_boxes)
+# for i, box in enumerate(polygon_to_xyxy(box_b)):
+#     print(f"box {i}: {box}")
 
-# result = polygon_to_bbox(read_label_txt(Path("YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_1.txt"))[0])
-
-# print(result)
+print(compute_true_positive(pred_boxes, gt_boxes, iou_threshold=0.5))
