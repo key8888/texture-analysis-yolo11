@@ -132,9 +132,17 @@ def compute_detection_metrics(pred_boxes: list[tuple[float, float, float, float]
     }
 
 
-pred_boxes = read_xyxy_from_json(Path("predict/result_no_spcdr_1.json"))
+# pred_boxes = read_xyxy_from_json(Path("predict/result_no_spcdr_1.json"))
 
-gt_boxes = read_polygon_from_txt(Path("YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_1.txt"))
-gt_boxes = polygon_to_xyxy(gt_boxes)
+# gt_boxes = read_polygon_from_txt(Path("YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_1.txt"))
+# gt_boxes = polygon_to_xyxy(gt_boxes)
 
-print(compute_detection_metrics(pred_boxes, gt_boxes, iou_threshold=0.5))
+# print(compute_detection_metrics(pred_boxes, gt_boxes, iou_threshold=0.5))
+
+for i in range(1, 11):
+    pred_boxes = read_xyxy_from_json(Path(f"predict/result_no_spcdr_{i}.json"))
+    gt_boxes = read_polygon_from_txt(Path(f"YOLO_dataset_zip/project-6-at-2025-03-23-20-14-00444e1f/labels/spcdr_{i}.txt"))
+    gt_boxes = polygon_to_xyxy(gt_boxes)
+
+    print(f"spcdr_{i}:", end=" ")
+    print(compute_detection_metrics(pred_boxes, gt_boxes, iou_threshold=0.6))
